@@ -1,5 +1,5 @@
-
-require File.dirname(__FILE__) + '/lib/word_search'
+#!/usr/bin/env ruby
+require File.dirname(__FILE__) + '/../lib/word_search'
 
 include WordSearch
 
