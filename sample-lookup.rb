@@ -2,7 +2,7 @@
 #
 
 $:.unshift  "lib"
-$:.unshift  "ext/ftsearch"
+$:.unshift  "ext/ftsearchrt"
 
 require 'ftsearch/suffix_array_reader'
 require 'ftsearch/fulltext_reader'
