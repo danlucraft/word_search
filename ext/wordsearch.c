@@ -473,7 +473,7 @@ void Init_ftsearchrt()
  VALUE cSuffixArrayReader;
  VALUE cSimpleIdentifierAnalyzer;
  
- cSuffixArrayWriter = rb_eval_string_protect("::FTSearch::SuffixArrayWriter", &status);
+ cSuffixArrayWriter = rb_eval_string_protect("::WordSearch::SuffixArrayWriter", &status);
  if(!status) {
      rb_define_method(cSuffixArrayWriter, "sort!", sort_bang, 1);
 #if SIZEOF_LONG_LONG != SIZEOF_VOIDP
@@ -483,17 +483,17 @@ void Init_ftsearchrt()
      fprintf(stderr, "Using slower, 64-bit safe SuffixArrayWriter.\n");
 #endif
  }
- cWhiteSpaceAnalyzer = rb_eval_string_protect("::FTSearch::Analysis::WhiteSpaceAnalyzer", &status);
+ cWhiteSpaceAnalyzer = rb_eval_string_protect("::WordSearch::Analysis::WhiteSpaceAnalyzer", &status);
  if(!status) {
      rb_define_method(cWhiteSpaceAnalyzer, "append_suffixes", 
                       whitespace_analyzer_append_suffixes, 3);
  }
- cSimpleIdentifierAnalyzer = rb_eval_string_protect("::FTSearch::Analysis::SimpleIdentifierAnalyzer", &status);
+ cSimpleIdentifierAnalyzer = rb_eval_string_protect("::WordSearch::Analysis::SimpleIdentifierAnalyzer", &status);
  if(!status) {
      rb_define_method(cSimpleIdentifierAnalyzer, "append_suffixes", 
                       si_analyzer_append_suffixes, 3);
  }
- cDocumentMapReader = rb_eval_string_protect("::FTSearch::DocumentMapReader", &status);
+ cDocumentMapReader = rb_eval_string_protect("::WordSearch::DocumentMapReader", &status);
  if(!status) {
      rb_define_method(cDocumentMapReader, "binary_search", dm_reader_binary_search, 4);
      rb_define_method(cDocumentMapReader, "document_uri", dm_reader_document_uri, 2);
@@ -501,7 +501,7 @@ void Init_ftsearchrt()
      rb_define_method(cDocumentMapReader, "rank_offsets_probabilistic", dm_reader_rank_offsets_probabilistic, 3);
  }
 
- cSuffixArrayReader = rb_eval_string_protect("::FTSearch::SuffixArrayReader", &status);
+ cSuffixArrayReader = rb_eval_string_protect("::WordSearch::SuffixArrayReader", &status);
  if(!status) {
 #if SIZEOF_LONG_LONG != SIZEOF_VOIDP
      rb_define_method(cSuffixArrayReader, "lazyhits_to_offsets", sa_reader_lazyhits_to_offsets, 1);

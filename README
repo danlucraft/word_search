@@ -1,4 +1,12 @@
 
+Word Search
+===========
+
+A simple word search library. Forked from Mauricio Fernandez' ftsearch library.
+
+
+OLD README:
+
 This is far from finished, but there's enough done to compare the performance
 for some basic searches (word-prefix, word and phrasal).
 

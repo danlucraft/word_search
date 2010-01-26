@@ -1,16 +1,7 @@
-# Copyright (C) 2006  Mauricio Fernandez <mfp@acm.org>
-#
 
-$:.unshift  "lib"
-$:.unshift  "ext/ftsearchrt"
+require File.dirname(__FILE__) + '/lib/word_search'
 
-require 'ftsearch/suffix_array_reader'
-require 'ftsearch/fulltext_reader'
-require 'ftsearch/document_map_reader'
-
-require 'ftsearchrt'
-
-include FTSearch
+include WordSearch
 
 dir = ARGV[0] || "INDEX-test"
 
