@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
 require File.dirname(__FILE__) + '/../lib/word_search'
-
+$DEBUG = true
 FileUtils.rm_rf "INDEX-test"
-
+s = Time.now
 class FileNameAnalyzer < WordSearch::Analysis::Analyzer
 
   def append_suffixes(array, text, offset)
@@ -28,9 +28,10 @@ file_list = Dir[ARGV[0]]
 
 file_list[0, file_list.size/1].each do |file|
   body = File.read(file)
-  puts "adding #{file} -- #{body.size}"
+  #puts "adding #{file} -- #{body.size}"
   fragment.add_document(:uri => file, :body => body)
 end
 
 puts "writing"
 fragment.finish!
+puts "took #{Time.now - s}s"

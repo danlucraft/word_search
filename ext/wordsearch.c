@@ -464,7 +464,7 @@ sa_reader_lazyhits_to_offsets(VALUE self, VALUE lazyhits)
  return ret;
 }
 
-void Init_ftsearchrt()
+void Init_wordsearch()
 {
  int status;
  VALUE cSuffixArrayWriter;

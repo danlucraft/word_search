@@ -19,4 +19,5 @@ require 'word_search/suffix_array_reader'
 require 'word_search/suffix_array_writer'
 
 require 'word_search/fragment_writer'
- 
+
+#require 'ext/wordsearch'

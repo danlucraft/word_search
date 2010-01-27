@@ -16,6 +16,7 @@ module WordSearch
     }
   
     attr_reader :fulltext_writer, :suffix_array_writer, :doc_map_writer
+    
     def initialize(options = {})
       options = DEFAULT_OPTIONS.merge(options)
       create  = lambda do |name, *args|
