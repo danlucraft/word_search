@@ -20,7 +20,7 @@ module WordSearch
     def initialize(options = {})
       options = DEFAULT_OPTIONS.merge(options)
       create  = lambda do |name, *args|
-        options[name] || options[(name.to_s + "_class").to_sym].new(*args)
+        options[(name.to_s + "_class").to_sym].new(*args)
       end
       build_path = lambda do |suffix|
         if @path
@@ -36,12 +36,12 @@ module WordSearch
         FileUtils.mkdir_p(@tmpdir)
       end
   
-      @fulltext_writer     = create.call(:fulltext_writer, :path     => build_path["fulltext"])
-      @suffix_array_writer = create.call(:suffix_array_writer, :path => build_path["suffixes"])
-      @doc_map_writer      = create.call(:doc_map_writer, :path      => build_path["docmap"])
+      @fulltext_writer     = options[:fulltext_writer]     || create.call(:fulltext_writer, :path     => build_path["fulltext"])
+      @suffix_array_writer = options[:suffix_array_writer] || create.call(:suffix_array_writer, :path => build_path["suffixes"])
+      @doc_map_writer      = options[:doc_map_writer]      || create.call(:doc_map_writer, :path      => build_path["docmap"])
   
       default_analyzer = (klass = options[:default_analyzer_class]) ? klass.new : nil
-      @field_infos     = create.call(:field_infos, :default_analyzer => default_analyzer)
+      @field_infos     = options[:field_infos] || create.call(:field_infos, :default_analyzer => default_analyzer)
       @num_documents   = 0
       @field_map       = Hash.new{|h,k| h[k.to_sym] = h.size}
       @field_map[:uri] # init
