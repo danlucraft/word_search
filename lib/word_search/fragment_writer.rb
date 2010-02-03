@@ -14,6 +14,8 @@ module WordSearch
       :suffix_array_writer       => nil,
       :doc_map_writer_nil        => nil,
     }
+    
+    attr_reader :options
   
     def initialize(options = {})
       @options = DEFAULT_OPTIONS.merge(options)
@@ -21,8 +23,8 @@ module WordSearch
         FileUtils.mkdir_p(tmpdir)
       end
   
-      default_analyzer = (klass = @options[:default_analyzer_class]) ? klass.new : nil
-      @field_infos     = @options[:field_infos] || create(:field_infos, :default_analyzer => default_analyzer)
+      default_analyzer = (klass = options[:default_analyzer_class]) ? klass.new : nil
+      @field_infos     = options[:field_infos] || create(:field_infos, :default_analyzer => default_analyzer)
       @num_documents   = 0
       @field_map       = Hash.new{|h,k| h[k.to_sym] = h.size}
       @field_map[:uri] # init
@@ -33,15 +35,15 @@ module WordSearch
     end
     
     def fulltext_writer
-      @fulltext_writer ||= (@options[:fulltext_writer] || create(:fulltext_writer, :path => build_path("fulltext")))
+      @fulltext_writer ||= (options[:fulltext_writer] || create(:fulltext_writer, :path => build_path("fulltext")))
     end
     
     def suffix_array_writer
-      @suffix_array_writer ||= (@options[:suffix_array_writer] || create(:suffix_array_writer, :path => build_path("suffixes")))
+      @suffix_array_writer ||= (options[:suffix_array_writer] || create(:suffix_array_writer, :path => build_path("suffixes")))
     end
     
     def doc_map_writer
-      @doc_map_writer ||= (@options[:doc_map_writer] || create(:doc_map_writer, :path => build_path("docmap")))
+      @doc_map_writer ||= (options[:doc_map_writer] || create(:doc_map_writer, :path => build_path("docmap")))
     end
     
     def build_path(suffix)
@@ -53,7 +55,7 @@ module WordSearch
     end
     
     def path
-      File.expand_path(@options[:path])
+      File.expand_path(options[:path])
     end
   
     def add_document(doc_hash)
