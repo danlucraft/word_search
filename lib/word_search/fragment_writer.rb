@@ -22,16 +22,28 @@ module WordSearch
       if path
         FileUtils.mkdir_p(tmpdir)
       end
-  
-      default_analyzer = (klass = options[:default_analyzer_class]) ? klass.new : nil
-      @field_infos     = options[:field_infos] || create(:field_infos, :default_analyzer => default_analyzer)
+      
       @num_documents   = 0
-      @field_map       = Hash.new{|h,k| h[k.to_sym] = h.size}
-      @field_map[:uri] # init
     end
     
     def create(name, *args)
       @options[(name.to_s + "_class").to_sym].new(*args)
+    end
+    
+    def default_analyzer
+      @default_analyzer ||= ((klass = options[:default_analyzer_class]) ? klass.new : nil)
+    end
+    
+    def field_infos
+      @field_infos ||= (options[:field_infos] || create(:field_infos, :default_analyzer => default_analyzer))
+    end
+    
+    def field_map
+      @field_map ||= begin
+        r = Hash.new{|h,k| h[k.to_sym] = h.size}
+        r[:uri] # init
+        r
+      end
     end
     
     def fulltext_writer
@@ -61,7 +73,7 @@ module WordSearch
     def add_document(doc_hash)
       uri = doc_hash[:uri] || @num_documents.to_s
       fulltext_writer.add_document(@num_documents, doc_hash.merge(:uri => uri), 
-                                    @field_map, @field_infos, suffix_array_writer, doc_map_writer)
+                                    field_map, field_infos, suffix_array_writer, doc_map_writer)
       @num_documents += 1
     end
   
@@ -79,12 +91,12 @@ module WordSearch
       @num_documents = doc_map_reader.num_documents
       File.open(File.join(fragment_directory, "fieldmap"), "rb") do |f|
         i = 0
-        f.each_line{|l| @field_map[l.chomp.to_sym] = i; i+= 1}
+        f.each_line{|l| field_map[l.chomp.to_sym] = i; i+= 1}
       end
     end
   
     def fields
-      @field_map.sort_by{|field, fid| fid}.map{|field, fid| field}
+      field_map.sort_by{|field, fid| fid}.map{|field, fid| field}
     end
   
     def documents
@@ -92,7 +104,7 @@ module WordSearch
     end
   
     def field_id(field)
-      @field_map.has_key?(field) && @field_map[field]
+      field_map.has_key?(field) and field_map[field]
     end
   
     def finish!
@@ -103,7 +115,7 @@ module WordSearch
   
       if path
         File.open(File.join(tmpdir, "fieldmap"), "wb") do |f|
-          @field_map.sort_by{|field_name, field_id| field_id}.each do |field_name, field_id| 
+          field_map.sort_by{|field_name, field_id| field_id}.each do |field_name, field_id| 
             f.puts field_name
           end
           File.rename(tmpdir, path)
