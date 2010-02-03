@@ -6,13 +6,13 @@ module WordSearch
     DEFAULT_OPTIONS = {
       :path => "docmap-#{Process.pid}-#{rand(100000)}",
     }
+    
     def initialize(options = {})
       options    = DEFAULT_OPTIONS.merge(options)
       @path      = options[:path]
       @field_arr = []
       @uri_tbl   = []
       @data      = [@uri_tbl, @field_arr]
-      initialize_in_memory_buffer
     end
   
     def merge(doc_map_reader)

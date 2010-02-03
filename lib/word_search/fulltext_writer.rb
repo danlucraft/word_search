@@ -12,7 +12,6 @@ module WordSearch
     def initialize(options = {})
       options = DEFAULT_OPTIONS.merge(options)
       @path   = options[:path]
-      initialize_in_memory_buffer
       if @path
         @io     = File.open(@path, "wb")
       else

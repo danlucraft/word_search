@@ -1,12 +1,8 @@
 
 module WordSearch
   module InMemoryWriter
-    def initialize_in_memory_buffer
-      @memory_io = StringIO.new("")
-    end
-    
     def memory_io
-      @memory_io
+      @memory_io ||= StringIO.new("")
     end
   
     def data

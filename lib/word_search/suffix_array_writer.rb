@@ -17,7 +17,6 @@ module WordSearch
       @block_size         = options[:block_size]
       @inline_suffix_size = options[:inline_suffix_size]
       @finished           = false
-      initialize_in_memory_buffer
     end
   
     def merge(suffix_array_reader)
