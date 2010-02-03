@@ -4,15 +4,6 @@ module WordSearch
   class FragmentWriter
     DEFAULT_OPTIONS = {
       :path                      => "wordsearch-#{Process.pid}-#{rand(100000)}",
-      :default_analyzer_class    => WordSearch::Analysis::WhiteSpaceAnalyzer,
-      :field_infos_class         => FieldInfos,
-      :fulltext_writer_class     => FulltextWriter,
-      :suffix_array_writer_class => SuffixArrayWriter,
-      :doc_map_writer_class      => DocumentMapWriter,
-      :field_infos               => nil,
-      :fulltext_writer           => nil,
-      :suffix_array_writer       => nil,
-      :doc_map_writer_nil        => nil,
     }
     
     attr_reader :options
@@ -28,11 +19,11 @@ module WordSearch
     end
     
     def default_analyzer
-      @default_analyzer ||= ((klass = options[:default_analyzer_class]) ? klass.new : nil)
+      @default_analyzer ||= (options[:default_analyzer] || WordSearch::Analysis::WhiteSpaceAnalyzer.new)
     end
     
     def field_infos
-      @field_infos ||= (options[:field_infos] || create(:field_infos, :default_analyzer => default_analyzer))
+      @field_infos ||= (options[:field_infos] || FieldInfos.new(:default_analyzer => default_analyzer))
     end
     
     def field_map
@@ -44,15 +35,15 @@ module WordSearch
     end
     
     def fulltext_writer
-      @fulltext_writer ||= (options[:fulltext_writer] || create(:fulltext_writer, :path => build_path("fulltext")))
+      @fulltext_writer ||= (options[:fulltext_writer] || FulltextWriter.new(:path => build_path("fulltext")))
     end
     
     def suffix_array_writer
-      @suffix_array_writer ||= (options[:suffix_array_writer] || create(:suffix_array_writer, :path => build_path("suffixes")))
+      @suffix_array_writer ||= (options[:suffix_array_writer] || SuffixArrayWriter.new(:path => build_path("suffixes")))
     end
     
     def doc_map_writer
-      @doc_map_writer ||= (options[:doc_map_writer] || create(:doc_map_writer, :path => build_path("docmap")))
+      @doc_map_writer ||= (options[:doc_map_writer] || DocumentMapWriter.new(:path => build_path("docmap")))
     end
     
     def build_path(suffix)

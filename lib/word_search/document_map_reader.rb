@@ -5,6 +5,7 @@ module WordSearch
       :path => nil,
       :io   => nil,
     }
+    
     def initialize(options = {})
       options = DEFAULT_OPTIONS.merge(options)
       unless options[:path] || options[:io]
