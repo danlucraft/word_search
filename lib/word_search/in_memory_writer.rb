@@ -4,6 +4,10 @@ module WordSearch
     def initialize_in_memory_buffer
       @memory_io = StringIO.new("")
     end
+    
+    def memory_io
+      @memory_io
+    end
   
     def data
       if @path

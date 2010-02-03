@@ -16,7 +16,7 @@ module WordSearch
       if @path
         @io     = File.open(@path, "wb")
       else
-        @io     = @memory_io
+        @io     = memory_io
       end
     end
   

@@ -57,7 +57,7 @@ module WordSearch
   
     private
     def dump_suffixes(fulltext)
-      io = @path ? File.open(@path, "wb") : @memory_io
+      io = @path ? File.open(@path, "wb") : memory_io
       io.write([@suffixes.size, @block_size || 0, @inline_suffix_size].pack("VVV"))
       if @block_size
         dump_inline_suffixes(io, fulltext)

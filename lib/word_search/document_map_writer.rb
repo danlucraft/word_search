@@ -35,7 +35,7 @@ module WordSearch
           Marshal.dump(@data, f)
         end
       else
-        Marshal.dump(@data, @memory_io)
+        Marshal.dump(@data, memory_io)
       end
     end
   end

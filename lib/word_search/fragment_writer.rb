@@ -19,10 +19,7 @@ module WordSearch
   
     def initialize(options = {})
       @options = DEFAULT_OPTIONS.merge(options)
-      if path
-        FileUtils.mkdir_p(tmpdir)
-      end
-      
+      FileUtils.mkdir_p(tmpdir) if path
       @num_documents   = 0
     end
     
