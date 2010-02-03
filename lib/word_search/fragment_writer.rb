@@ -15,15 +15,11 @@ module WordSearch
       :doc_map_writer_nil        => nil,
     }
   
-    attr_reader :doc_map_writer
-    
     def initialize(options = {})
       @options = DEFAULT_OPTIONS.merge(options)
       if path
         FileUtils.mkdir_p(tmpdir)
       end
-      
-      @doc_map_writer      = @options[:doc_map_writer]      || create(:doc_map_writer,      :path => build_path("docmap"))
   
       default_analyzer = (klass = @options[:default_analyzer_class]) ? klass.new : nil
       @field_infos     = @options[:field_infos] || create(:field_infos, :default_analyzer => default_analyzer)
@@ -44,6 +40,10 @@ module WordSearch
       @suffix_array_writer ||= (@options[:suffix_array_writer] || create(:suffix_array_writer, :path => build_path("suffixes")))
     end
     
+    def doc_map_writer
+      @doc_map_writer ||= (@options[:doc_map_writer] || create(:doc_map_writer, :path => build_path("docmap")))
+    end
+    
     def build_path(suffix)
       path ? File.join(tmpdir, suffix) : nil
     end
@@ -59,7 +59,7 @@ module WordSearch
     def add_document(doc_hash)
       uri = doc_hash[:uri] || @num_documents.to_s
       fulltext_writer.add_document(@num_documents, doc_hash.merge(:uri => uri), 
-                                    @field_map, @field_infos, suffix_array_writer, @doc_map_writer)
+                                    @field_map, @field_infos, suffix_array_writer, doc_map_writer)
       @num_documents += 1
     end
   
@@ -72,7 +72,7 @@ module WordSearch
       doc_map_reader      = DocumentMapReader.new(:path => "#{fragment_directory}/docmap")
       fulltext_writer.merge(fulltext_reader)
       suffix_array_writer.merge(suffix_array_reader)
-      @doc_map_writer.merge(doc_map_reader)
+      doc_map_writer.merge(doc_map_reader)
       #FIXME: .num_documents will be wrong if some URIs were repeated
       @num_documents = doc_map_reader.num_documents
       File.open(File.join(fragment_directory, "fieldmap"), "rb") do |f|
@@ -97,7 +97,7 @@ module WordSearch
       fulltext_writer.finish!
       fulltext = fulltext_writer.data
       suffix_array_writer.finish!(fulltext)
-      @doc_map_writer.finish!
+      doc_map_writer.finish!
   
       if path
         File.open(File.join(tmpdir, "fieldmap"), "wb") do |f|
