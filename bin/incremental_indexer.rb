@@ -1,5 +1,6 @@
+#!/usr/bin/env ruby
 
-require File.dirname(__FILE__) + '/lib/word_search'
+require File.dirname(__FILE__) + '/../lib/word_search'
 
 BASE_PATH="INDEX_incremental"
 
@@ -10,11 +11,12 @@ field_infos.add_field(:name => :body, :analyzer => WordSearch::Analysis::WhiteSp
 latest = Dir["#{BASE_PATH}-*"].sort.last
 
 if latest
-  fragment  = WordSearch::FragmentWriter.new(:path => latest.succ, :field_infos => field_infos)
+  fragment  = WordSearch::FragmentWriter.new(latest.succ)
+  fragment.field_infos = field_infos
   fragment.merge(latest)
 else
-  fragment  = WordSearch::FragmentWriter.new(:path => "#{BASE_PATH}-0000000", 
-                                           :field_infos => field_infos)
+  fragment  = WordSearch::FragmentWriter.new("#{BASE_PATH}-0000000")
+  fragment.field_infos = field_infos
 end
 
 ARGV.each do |fname|

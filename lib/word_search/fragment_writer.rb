@@ -56,7 +56,7 @@ module WordSearch
     def add_document(doc_hash)
       uri = doc_hash[:uri] || @num_documents.to_s
       fulltext_writer.add_document(@num_documents, doc_hash.merge(:uri => uri), 
-                                    field_map, field_infos, suffix_array_writer, doc_map_writer)
+                                   field_map, field_infos, suffix_array_writer, doc_map_writer)
       @num_documents += 1
     end
   
