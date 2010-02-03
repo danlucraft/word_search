@@ -26,7 +26,8 @@ field_infos = WordSearch::FieldInfos.new
 field_infos.add_field(:name => :uri, :analyzer => FileNameAnalyzer.new)
 field_infos.add_field(:name => :body, :analyzer => WordSearch::Analysis::SimpleIdentifierAnalyzer.new)
 
-fragment  = WordSearch::FragmentWriter.new(:path => "INDEX-test", :field_infos => field_infos)
+fragment  = WordSearch::FragmentWriter.new("INDEX-test")
+fragment.field_infos = field_infos
 
 file_list = Dir[ARGV[0]]
 

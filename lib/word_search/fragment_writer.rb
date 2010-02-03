@@ -2,48 +2,15 @@
 module WordSearch
 
   class FragmentWriter
-    DEFAULT_OPTIONS = {
-      :path                      => "wordsearch-#{Process.pid}-#{rand(100000)}",
-    }
+    DEFAULT_PATH = "wordsearch-#{Process.pid}-#{rand(100000)}"
     
-    attr_reader :options
+    attr_reader :path
+    attr_writer :default_analyzer, :field_infos, :field_map, :fulltext_writer, :doc_map_writer, :suffix_array_writer
   
-    def initialize(options = {})
-      @options = DEFAULT_OPTIONS.merge(options)
-      FileUtils.mkdir_p(tmpdir) if path
+    def initialize(path)
+      @path = path || DEFAULT_PATH
+      FileUtils.mkdir_p(tmpdir)
       @num_documents   = 0
-    end
-    
-    def create(name, *args)
-      @options[(name.to_s + "_class").to_sym].new(*args)
-    end
-    
-    def default_analyzer
-      @default_analyzer ||= (options[:default_analyzer] || WordSearch::Analysis::WhiteSpaceAnalyzer.new)
-    end
-    
-    def field_infos
-      @field_infos ||= (options[:field_infos] || FieldInfos.new(:default_analyzer => default_analyzer))
-    end
-    
-    def field_map
-      @field_map ||= begin
-        r = Hash.new{|h,k| h[k.to_sym] = h.size}
-        r[:uri] # init
-        r
-      end
-    end
-    
-    def fulltext_writer
-      @fulltext_writer ||= (options[:fulltext_writer] || FulltextWriter.new(:path => build_path("fulltext")))
-    end
-    
-    def suffix_array_writer
-      @suffix_array_writer ||= (options[:suffix_array_writer] || SuffixArrayWriter.new(:path => build_path("suffixes")))
-    end
-    
-    def doc_map_writer
-      @doc_map_writer ||= (options[:doc_map_writer] || DocumentMapWriter.new(:path => build_path("docmap")))
     end
     
     def build_path(suffix)
@@ -55,9 +22,37 @@ module WordSearch
     end
     
     def path
-      File.expand_path(options[:path])
+      File.expand_path(@path)
     end
-  
+    
+    def default_analyzer
+      @default_analyzer ||= WordSearch::Analysis::WhiteSpaceAnalyzer.new
+    end
+    
+    def field_infos
+      @field_infos ||= FieldInfos.new(:default_analyzer => default_analyzer)
+    end
+    
+    def field_map
+      @field_map ||= begin
+        r = Hash.new{|h,k| h[k.to_sym] = h.size}
+        r[:uri] # init
+        r
+      end
+    end
+    
+    def fulltext_writer
+      @fulltext_writer ||= FulltextWriter.new(:path => build_path("fulltext"))
+    end
+    
+    def suffix_array_writer
+      @suffix_array_writer ||= SuffixArrayWriter.new(:path => build_path("suffixes"))
+    end
+    
+    def doc_map_writer
+      @doc_map_writer ||= DocumentMapWriter.new(:path => build_path("docmap"))
+    end
+    
     def add_document(doc_hash)
       uri = doc_hash[:uri] || @num_documents.to_s
       fulltext_writer.add_document(@num_documents, doc_hash.merge(:uri => uri), 
