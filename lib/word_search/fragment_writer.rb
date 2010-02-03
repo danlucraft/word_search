@@ -15,7 +15,7 @@ module WordSearch
       :doc_map_writer_nil        => nil,
     }
   
-    attr_reader :fulltext_writer, :suffix_array_writer, :doc_map_writer
+    attr_reader :doc_map_writer
     
     def initialize(options = {})
       @options = DEFAULT_OPTIONS.merge(options)
@@ -23,7 +23,6 @@ module WordSearch
         FileUtils.mkdir_p(tmpdir)
       end
       
-      @suffix_array_writer = @options[:suffix_array_writer] || create(:suffix_array_writer, :path => build_path("suffixes"))
       @doc_map_writer      = @options[:doc_map_writer]      || create(:doc_map_writer,      :path => build_path("docmap"))
   
       default_analyzer = (klass = @options[:default_analyzer_class]) ? klass.new : nil
@@ -38,7 +37,11 @@ module WordSearch
     end
     
     def fulltext_writer
-      @fulltext_writer ||= (@options[:fulltext_writer]     || create(:fulltext_writer,     :path => build_path("fulltext")))
+      @fulltext_writer ||= (@options[:fulltext_writer] || create(:fulltext_writer, :path => build_path("fulltext")))
+    end
+    
+    def suffix_array_writer
+      @suffix_array_writer ||= (@options[:suffix_array_writer] || create(:suffix_array_writer, :path => build_path("suffixes")))
     end
     
     def build_path(suffix)
@@ -56,7 +59,7 @@ module WordSearch
     def add_document(doc_hash)
       uri = doc_hash[:uri] || @num_documents.to_s
       fulltext_writer.add_document(@num_documents, doc_hash.merge(:uri => uri), 
-                                    @field_map, @field_infos, @suffix_array_writer, @doc_map_writer)
+                                    @field_map, @field_infos, suffix_array_writer, @doc_map_writer)
       @num_documents += 1
     end
   
@@ -68,7 +71,7 @@ module WordSearch
                                                   :path => "#{fragment_directory}/suffixes")
       doc_map_reader      = DocumentMapReader.new(:path => "#{fragment_directory}/docmap")
       fulltext_writer.merge(fulltext_reader)
-      @suffix_array_writer.merge(suffix_array_reader)
+      suffix_array_writer.merge(suffix_array_reader)
       @doc_map_writer.merge(doc_map_reader)
       #FIXME: .num_documents will be wrong if some URIs were repeated
       @num_documents = doc_map_reader.num_documents
@@ -93,7 +96,7 @@ module WordSearch
     def finish!
       fulltext_writer.finish!
       fulltext = fulltext_writer.data
-      @suffix_array_writer.finish!(fulltext)
+      suffix_array_writer.finish!(fulltext)
       @doc_map_writer.finish!
   
       if path
