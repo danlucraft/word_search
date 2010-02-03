@@ -4,13 +4,13 @@ module WordSearch
   class FragmentWriter
     DEFAULT_PATH = "wordsearch-#{Process.pid}-#{rand(100000)}"
     
-    attr_reader :path
+    attr_reader :path, :num_documents
     attr_writer :default_analyzer, :field_infos, :field_map, :fulltext_writer, :doc_map_writer, :suffix_array_writer
   
     def initialize(path)
       @path = path || DEFAULT_PATH
       FileUtils.mkdir_p(tmpdir)
-      @num_documents   = 0
+      @num_documents = 0
     end
     
     def build_path(suffix)
@@ -55,35 +55,14 @@ module WordSearch
     
     def add_document(doc_hash)
       uri = doc_hash[:uri] || @num_documents.to_s
-      fulltext_writer.add_document(@num_documents, doc_hash.merge(:uri => uri), 
-                                   field_map, field_infos, suffix_array_writer, doc_map_writer)
+      fulltext_writer.add_document(
+          num_documents, doc_hash.merge(:uri => uri), field_map, field_infos, suffix_array_writer, doc_map_writer
+        )
       @num_documents += 1
     end
-  
-    def merge(fragment_directory)
-      raise "Cannot import old data unless the destination Fragment is empty." unless @num_documents == 0
-      # TODO: use a FragmentReader to access old data
-      fulltext_reader     = FulltextReader.new(:path => "#{fragment_directory}/fulltext")
-      suffix_array_reader = SuffixArrayReader.new(fulltext_reader, nil, 
-                                                  :path => "#{fragment_directory}/suffixes")
-      doc_map_reader      = DocumentMapReader.new(:path => "#{fragment_directory}/docmap")
-      fulltext_writer.merge(fulltext_reader)
-      suffix_array_writer.merge(suffix_array_reader)
-      doc_map_writer.merge(doc_map_reader)
-      #FIXME: .num_documents will be wrong if some URIs were repeated
-      @num_documents = doc_map_reader.num_documents
-      File.open(File.join(fragment_directory, "fieldmap"), "rb") do |f|
-        i = 0
-        f.each_line{|l| field_map[l.chomp.to_sym] = i; i+= 1}
-      end
-    end
-  
+    
     def fields
       field_map.sort_by{|field, fid| fid}.map{|field, fid| field}
-    end
-  
-    def documents
-      @num_documents
     end
   
     def field_id(field)
@@ -105,5 +84,24 @@ module WordSearch
         end
       end
     end
+    
+    def merge(fragment_directory)
+      raise "Cannot import old data unless the destination Fragment is empty." unless @num_documents == 0
+      # TODO: use a FragmentReader to access old data
+      fulltext_reader     = FulltextReader.new(:path => "#{fragment_directory}/fulltext")
+      suffix_array_reader = SuffixArrayReader.new(fulltext_reader, nil, 
+                                                  :path => "#{fragment_directory}/suffixes")
+      doc_map_reader      = DocumentMapReader.new(:path => "#{fragment_directory}/docmap")
+      fulltext_writer.merge(fulltext_reader)
+      suffix_array_writer.merge(suffix_array_reader)
+      doc_map_writer.merge(doc_map_reader)
+      #FIXME: .num_documents will be wrong if some URIs were repeated
+      @num_documents = doc_map_reader.num_documents
+      File.open(File.join(fragment_directory, "fieldmap"), "rb") do |f|
+        i = 0
+        f.each_line{|l| field_map[l.chomp.to_sym] = i; i+= 1}
+      end
+    end
+  
   end
 end
