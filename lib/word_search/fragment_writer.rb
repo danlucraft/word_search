@@ -18,38 +18,44 @@ module WordSearch
     attr_reader :fulltext_writer, :suffix_array_writer, :doc_map_writer
     
     def initialize(options = {})
-      options = DEFAULT_OPTIONS.merge(options)
-      create  = lambda do |name, *args|
-        options[(name.to_s + "_class").to_sym].new(*args)
+      @options = DEFAULT_OPTIONS.merge(options)
+      if path
+        FileUtils.mkdir_p(tmpdir)
       end
-      build_path = lambda do |suffix|
-        if @path
-          File.join(@tmpdir, suffix)
-        else
-          nil
-        end
-      end
-      @path = options[:path]
-      if @path
-        @path   = File.expand_path(@path)
-        @tmpdir = @path + "#{Process.pid}-#{rand(100000)}"
-        FileUtils.mkdir_p(@tmpdir)
-      end
+      
+      @suffix_array_writer = @options[:suffix_array_writer] || create(:suffix_array_writer, :path => build_path("suffixes"))
+      @doc_map_writer      = @options[:doc_map_writer]      || create(:doc_map_writer,      :path => build_path("docmap"))
   
-      @fulltext_writer     = options[:fulltext_writer]     || create.call(:fulltext_writer, :path     => build_path["fulltext"])
-      @suffix_array_writer = options[:suffix_array_writer] || create.call(:suffix_array_writer, :path => build_path["suffixes"])
-      @doc_map_writer      = options[:doc_map_writer]      || create.call(:doc_map_writer, :path      => build_path["docmap"])
-  
-      default_analyzer = (klass = options[:default_analyzer_class]) ? klass.new : nil
-      @field_infos     = options[:field_infos] || create.call(:field_infos, :default_analyzer => default_analyzer)
+      default_analyzer = (klass = @options[:default_analyzer_class]) ? klass.new : nil
+      @field_infos     = @options[:field_infos] || create(:field_infos, :default_analyzer => default_analyzer)
       @num_documents   = 0
       @field_map       = Hash.new{|h,k| h[k.to_sym] = h.size}
       @field_map[:uri] # init
     end
+    
+    def create(name, *args)
+      @options[(name.to_s + "_class").to_sym].new(*args)
+    end
+    
+    def fulltext_writer
+      @fulltext_writer ||= (@options[:fulltext_writer]     || create(:fulltext_writer,     :path => build_path("fulltext")))
+    end
+    
+    def build_path(suffix)
+      path ? File.join(tmpdir, suffix) : nil
+    end
+    
+    def tmpdir
+      @tmpdir ||= path + "#{Process.pid}-#{rand(100000)}"
+    end
+    
+    def path
+      File.expand_path(@options[:path])
+    end
   
     def add_document(doc_hash)
       uri = doc_hash[:uri] || @num_documents.to_s
-      @fulltext_writer.add_document(@num_documents, doc_hash.merge(:uri => uri), 
+      fulltext_writer.add_document(@num_documents, doc_hash.merge(:uri => uri), 
                                     @field_map, @field_infos, @suffix_array_writer, @doc_map_writer)
       @num_documents += 1
     end
@@ -61,7 +67,7 @@ module WordSearch
       suffix_array_reader = SuffixArrayReader.new(fulltext_reader, nil, 
                                                   :path => "#{fragment_directory}/suffixes")
       doc_map_reader      = DocumentMapReader.new(:path => "#{fragment_directory}/docmap")
-      @fulltext_writer.merge(fulltext_reader)
+      fulltext_writer.merge(fulltext_reader)
       @suffix_array_writer.merge(suffix_array_reader)
       @doc_map_writer.merge(doc_map_reader)
       #FIXME: .num_documents will be wrong if some URIs were repeated
@@ -85,17 +91,17 @@ module WordSearch
     end
   
     def finish!
-      @fulltext_writer.finish!
-      fulltext = @fulltext_writer.data
+      fulltext_writer.finish!
+      fulltext = fulltext_writer.data
       @suffix_array_writer.finish!(fulltext)
       @doc_map_writer.finish!
   
-      if @path
-        File.open(File.join(@tmpdir, "fieldmap"), "wb") do |f|
+      if path
+        File.open(File.join(tmpdir, "fieldmap"), "wb") do |f|
           @field_map.sort_by{|field_name, field_id| field_id}.each do |field_name, field_id| 
             f.puts field_name
           end
-          File.rename(@tmpdir, @path)
+          File.rename(tmpdir, path)
         end
       end
     end
