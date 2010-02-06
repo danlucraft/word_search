@@ -2,15 +2,21 @@
 module WordSearch
   class FieldInfos
     DEFAULT_OPTIONS = {
-      :default_analyzer => WordSearch::Analysis::WhiteSpaceAnalyzer.new,
       :stored => true,
     }
+
+    attr_writer :default_analyzer
+    
     def initialize(options = {})
       options = DEFAULT_OPTIONS.merge(options)
       @fields = {}
       @default_options = options
     end
-  
+    
+    def default_analyzer
+      @default_analyzer ||= WordSearch::Analysis::WhiteSpaceAnalyzer.new
+    end
+    
     def add_field(options = {})
       options = @default_options.merge(options)
       raise "Need a name" unless options[:name]
@@ -26,13 +32,14 @@ module WordSearch
     end
   
     private
+    
     def store_field_info(options)
       options = @default_options.merge(options)
       unless options[:analyzer]
         if klass = options[:analyzer_class]
           options[:analyzer] = klass.new
         else
-          options[:analyzer] = @default_options[:default_analyzer]
+          options[:analyzer] = default_analyzer
         end
       end
       @fields[options[:name]] = options

@@ -30,7 +30,11 @@ module WordSearch
     end
     
     def field_infos
-      @field_infos ||= FieldInfos.new(:default_analyzer => default_analyzer)
+      @field_infos ||= begin
+        fis = FieldInfos.new
+        fis.default_analyzer = default_analyzer
+        fis
+      end
     end
     
     def field_map
@@ -62,7 +66,7 @@ module WordSearch
     end
     
     def fields
-      field_map.sort_by{|field, fid| fid}.map{|field, fid| field}
+      field_map.sort_by {|field, fid| fid }.map {|field, fid| field }
     end
   
     def field_id(field)
@@ -70,6 +74,7 @@ module WordSearch
     end
   
     def finish!
+      puts "#{@num_documents} docs"
       fulltext_writer.finish!
       fulltext = fulltext_writer.data
       suffix_array_writer.finish!(fulltext)
