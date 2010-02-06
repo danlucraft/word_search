@@ -8,6 +8,7 @@ require 'strscan'
 require 'word_search/analysis/analyzer'
 require 'word_search/analysis/simple_identifier_analyzer'
 require 'word_search/analysis/whitespace_analyzer'
+require 'word_search/analysis/file_name_analyzer'
 
 require 'word_search/in_memory_writer'
 require 'word_search/document_map_reader'

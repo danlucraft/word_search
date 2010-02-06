@@ -10,6 +10,7 @@ module WordSearch
       :inline_suffix_size => 8,
       :default_analyzer => nil,
     }
+    
     def initialize(options = {})
       options             = DEFAULT_OPTIONS.merge(options)
       @path               = options[:path]
@@ -29,7 +30,6 @@ module WordSearch
     end
   
     def add_suffixes(analyzer, data, offset)
-      #analyzer.new.find_suffixes(data).each{|x| @suffixes << offset + x}
       analyzer.append_suffixes(@suffixes, data, offset)
     end
   
@@ -55,6 +55,7 @@ module WordSearch
     end
   
     private
+    
     def dump_suffixes(fulltext)
       io = @path ? File.open(@path, "wb") : memory_io
       io.write([@suffixes.size, @block_size || 0, @inline_suffix_size].pack("VVV"))
@@ -74,7 +75,7 @@ module WordSearch
     end
   
     def dump_suffix_array(io)
-      @suffixes.each_slice(1024){|suffixes| io.write(suffixes.pack("V*")) }
+      @suffixes.each_slice(1024) {|suffixes| io.write(suffixes.pack("V*")) }
     end
   
     def add_padding(io)
@@ -86,7 +87,7 @@ module WordSearch
   
     def sort!(fulltext)
       tsize = fulltext.size
-      @suffixes = @suffixes.sort_by{|offset| fulltext[offset, tsize - offset]}
+      @suffixes = @suffixes.sort_by {|offset| fulltext[offset, tsize - offset] }
     end
   end
 end

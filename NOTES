@@ -1,0 +1,9 @@
+
+In the INDEX dir is the following files:
+
+ * fulltext: the complete uri and body of every file scanned.
+ * docmap: marshalled ruby array of 
+     1. array of uris, indexed by doc id, 
+     2. array of 4-tuples of [offsets within the fulltext, doc ids, field ids, data size]
+ * suffixes: look more into how this is formatted
+ * field: sorted list of field names

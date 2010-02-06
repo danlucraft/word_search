@@ -4,6 +4,7 @@ module WordSearch
   
   class SimpleIdentifierAnalyzer < Analyzer
     def append_suffixes(array, text, offset)
+    
       sc = StringScanner.new(text)
       sc.skip(/[^A-Za-z_]+/)
       until sc.eos?

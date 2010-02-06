@@ -1,5 +1,6 @@
 
 module WordSearch
+  # Map of document ids to uris
   class DocumentMapWriter
     include InMemoryWriter
   

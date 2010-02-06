@@ -49,15 +49,18 @@ module WordSearch
     end
     
     private
+
+    # Writes the length of the document.    
     def write_document_header(doc_id, doc_hash, field_mapping, field_infos)
       stored_fields = doc_hash.select do |field_name, data|
         field_infos[field_name][:stored]
       end
-      total_size = stored_fields.inject(0){|s,(_,data)| s + data.size} + stored_fields.size * 9
-      # 9 = field ids plus field size plus trailing \0
+      total_size = stored_fields.inject(0) {|s,(_,data)| s + data.size } + stored_fields.size * 9
+      # 9 = field ids (4 bytes) plus field size (4 bytes) plus trailing \0
       @io.write [total_size].pack("V")
     end
   
+    # Writes the field_id, the data length, the data, and a trailing \0
     def store_field(doc_id, field_name, field_id, data)
       @io.write [field_id, data.size].pack("V2")
       offset = @io.pos
