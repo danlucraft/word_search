@@ -1,18 +1,29 @@
 #!/usr/bin/env ruby
+
 require File.dirname(__FILE__) + '/../lib/word_search'
 
-include WordSearch
+class Lookup
+  attr_reader :dir, :probabilistic_sorting
+  attr_writer :fulltext_reader
 
-dir = ARGV[0] || "INDEX-test"
-
-fulltext_reader     = FulltextReader.new(:path => "#{dir}/fulltext")
-suffix_array_reader = SuffixArrayReader.new(fulltext_reader, nil, :path => "#{dir}/suffixes")
-doc_map_reader      = DocumentMapReader.new(:path => "#{dir}/docmap")
-
-probabilistic_sorting = ((ARGV.last||"").index("pro"))
-
-until (print "Input term: "; line = $stdin.gets.chomp).empty?
-  if line[0] == ?!
+  def initialize(dir, probabilistic_sorting)
+    @dir = dir
+    @probabilistic_sorting = probabilistic_sorting
+  end
+  
+  def fulltext_reader
+    @fulltext_reader ||= WordSearch::FulltextReader.new(:path => "#{dir}/fulltext")
+  end
+  
+  def suffix_array_reader
+    @suffix_array_reader ||= WordSearch::SuffixArrayReader.new(fulltext_reader, nil, :path => "#{dir}/suffixes")
+  end
+  
+  def doc_map_reader
+    @doc_map_reader ||= WordSearch::DocumentMapReader.new(:path => "#{dir}/docmap")
+  end
+  
+  def search_a(line)
     line = line[1..-1]
     t = Time.new
     hit = suffix_array_reader.find_first(line)
@@ -22,10 +33,12 @@ until (print "Input term: "; line = $stdin.gets.chomp).empty?
     p hit.context(30)
     t = Time.new
     puts "Total hits: #{suffix_array_reader.count_hits(line)} (#{Time.new - t})"
-  else
+  end
+
+  def search_b(line)
     h = Hash.new{|h,k| h[k] = 0}
     weights = Hash.new(1.0)
-    weights[0] = 10000000   # :uri
+    weights[0] = 10000000  # :uri
     weights[1] = 10000000  # :body
     t0 = Time.new
     hits = suffix_array_reader.find_all(line)
@@ -65,7 +78,7 @@ until (print "Input term: "; line = $stdin.gets.chomp).empty?
     d2 = Time.new - t1
     #sorted[0..100].each{|doc_id, score| doc_map_reader.document_id_to_uri(doc_id)}
     t2 = Time.new
-    sorted.each{|doc_id, score| doc_map_reader.document_id_to_uri(doc_id)}
+    sorted.each {|doc_id, score| doc_map_reader.document_id_to_uri(doc_id) }
     d3 = Time.new - t2
     d4 = Time.new - t0
     puts "Needed #{d1} for the search."
@@ -76,6 +89,19 @@ until (print "Input term: "; line = $stdin.gets.chomp).empty?
     puts sorted[0..10].map{ |doc_id, count|
       "%6d %5d %s" % [count, doc_id, doc_map_reader.document_id_to_uri(doc_id)]
     }
+  end
+end
+
+dir = ARGV[0] || "INDEX-test"
+probabilistic_sorting = ((ARGV.last||"").index("pro"))
+
+lookup = Lookup.new(dir, probabilistic_sorting)
+
+until (print "Input term: "; line = $stdin.gets.chomp).empty?
+  if line[0] == ?!
+    lookup.search_a(line)
+  else
+    lookup.search_b(line)
   end
 end
 

@@ -72,7 +72,7 @@ module WordSearch
         0
       end
     end
-  
+
     def find_all(term)
       from = binary_search(term, 0, @suffixes.size)
       offset = @suffixes[from]
@@ -83,7 +83,7 @@ module WordSearch
         LazyHits.new(term, self, @fulltext_reader, 0, 0)
       end
     end
-  
+
     def find_first(term)
       suffix_index = binary_search(term, 0, @suffixes.size)
       offset = @suffixes[suffix_index]
@@ -93,10 +93,10 @@ module WordSearch
         nil
       end
     end
-  
+
     def find_next(hit)
     end
-  
+
     def suffix_index_to_offset(suffix_index)
       @suffixes[suffix_index]
     end
