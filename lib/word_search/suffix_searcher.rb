@@ -11,6 +11,7 @@ module WordSearch
       end
   
       private
+      
       def strip_markers(str, size)
         first = (str.rindex("\0", -size) || -1) + 1
         last  = str.index("\0", size) || str.size
@@ -21,6 +22,7 @@ module WordSearch
     class LazyHits < Struct.new(:term, :suffix_array_reader, :fulltext_reader, 
                                 :from_index, :to_index)
       include Enumerable
+      
       def each
         sa_reader = self.suffix_array_reader
         ft_reader = self.fulltext_reader

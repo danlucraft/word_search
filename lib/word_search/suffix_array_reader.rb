@@ -9,9 +9,8 @@ module WordSearch
     
     attr_reader :block_size
     
-    def initialize(fulltext_reader, doc_map, options = {})
+    def initialize(doc_map, options = {})
       options = DEFAULT_OPTIONS.merge(options)
-      @fulltext_reader = fulltext_reader
       @doc_map         = doc_map
       unless options[:path] || options[:io]
         raise ArgumentError, "Need either the path to the suffix array file or an IO."

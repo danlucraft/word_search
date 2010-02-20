@@ -16,7 +16,7 @@ class Lookup
   end
   
   def suffix_array_reader
-    @suffix_array_reader ||= WordSearch::SuffixArrayReader.new(fulltext_reader, nil, :path => "#{dir}/suffixes")
+    @suffix_array_reader ||= WordSearch::SuffixArrayReader.new(nil, :path => "#{dir}/suffixes")
   end
   
   def doc_map_reader
