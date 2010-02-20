@@ -41,7 +41,8 @@ class Lookup
     weights[0] = 10000000  # :uri
     weights[1] = 10000000  # :body
     t0 = Time.new
-    hits = suffix_array_reader.find_all(line)
+    searcher = WordSearch::SuffixSearcher.new(suffix_array_reader, fulltext_reader)
+    hits = searcher.find_all(line)
     d1 = Time.new - t0
     t1 = Time.new
     size = hits.size

@@ -46,5 +46,163 @@ module WordSearch
         to_index - from_index
       end
     end
+      
+    def initialize(suffix_array_reader, fulltext_reader)
+      @suffixes = suffix_array_reader
+      @fulltext_reader = fulltext_reader
+    end
+      
+    def count_hits(term)
+      from = binary_search(term, 0, @suffixes.size)
+      offset = @suffixes[from]
+      if @fulltext_reader.get_data(offset, term.size) == term
+        to = binary_search_upper(term, 0, @suffixes.size)
+        to - from
+      else
+        0
+      end
+    end
+
+    def find_all(term)
+      from = binary_search(term, 0, @suffixes.size)
+      offset = @suffixes[from]
+      if @fulltext_reader.get_data(offset, term.size) == term
+        to = binary_search_upper(term, 0, @suffixes.size)
+        SuffixSearcher::LazyHits.new(term, self, @fulltext_reader, from, to)
+      else
+        SuffixSearcher::LazyHits.new(term, self, @fulltext_reader, 0, 0)
+      end
+    end
+
+    def find_first(term)
+      suffix_index = binary_search(term, 0, @suffixes.size)
+      offset = @suffixes[suffix_index]
+      if @fulltext_reader.get_data(offset, term.size) == term
+        SuffixSearcher::Hit.new(term, suffix_index, offset, @fulltext_reader)
+      else
+        nil
+      end
+    end
+
+    def binary_search(term, from, to)
+      from, to = binary_search_inline_suffixes(term, from, to)
+  
+      tsize = term.size
+      while from < to
+        middle = (from + to) / 2
+        pivot = @fulltext_reader.get_data(@suffixes[middle], tsize)
+        if term <= pivot
+          to = middle
+        else
+          from = middle + 1
+        end
+      end
+  
+      from
+    end
+  
+    def binary_search_upper(term, from, to)
+      from, to = binary_search_inline_suffixes_upper(term, from, to)
+      
+      tsize = term.size
+  
+      #puts "#{from} -- #{to}"
+      #from.upto(to+5) do |idx|
+      #  puts "#{idx}  #{@fulltext_reader.get_data(@suffixes[idx], tsize + 10).inspect}"
+      #end
+      while from < to
+        middle = (from + to) / 2
+        pivot = @fulltext_reader.get_data(@suffixes[middle], tsize)
+        if term < pivot
+          to = middle
+        else
+          from = middle + 1
+        end
+      end
+  
+      #puts "RET: #{from}"
+      from
+    end
+  
+  
+    def binary_search_inline_suffixes(term, from, to)
+      return [from, to] if @suffixes.block_size == 0
+  
+      tsize = term.size
+      while to - from > @suffixes.block_size
+        middle = (from + to) / 2
+        #puts "from: #{from}  to #{to}  middle: #{middle}" if $DEBUG
+        quotient, mod = middle.divmod(@suffixes.block_size)
+        middle = middle - mod
+        pivot = @suffixes.inline_suffixes[quotient]
+        #puts "NOW: #{middle}  pivot: #{pivot.inspect}" if $DEBUG
+        if tsize <= @suffixes.inline_suffix_size
+          if term <= pivot
+            to = middle
+          else
+            from = middle + 1
+          end
+        elsif term[0, @suffixes.inline_suffix_size] < pivot
+          to = middle
+        else
+          # FIXME: handle pivot[-1] = 255?
+          pivot = pivot.clone
+          pivot[-1] += 1
+          #puts "TESTING AGAINST new pivot: #{pivot.inspect}" if $DEBUG
+          if term > pivot
+            from = middle + 1
+          else  # term[0, @inline_suffix_size] == pivot, disambiguate
+            pivot = @fulltext_reader.get_data(@suffixes[middle], term.size)
+            if term <= pivot
+              to = middle
+            else
+              from = middle + 1
+            end
+          end
+        end
+      end
+  
+      [from, to]
+    end
+  
+    def binary_search_inline_suffixes_upper(term, from, to)
+      return [from, to] if @suffixes.block_size == 0
+  
+      tsize = term.size
+      while to - from > @suffixes.block_size
+        middle = (from + to) / 2
+        #puts "from: #{from}  to #{to}  middle: #{middle}" if $DEBUG
+        quotient, mod = middle.divmod(@suffixes.block_size)
+        middle = middle - mod
+        pivot = @suffixes.inline_suffixes[quotient]
+        #puts "NOW: #{middle}  pivot: #{pivot.inspect}" if $DEBUG
+        if tsize <= @suffixes.inline_suffix_size
+          if term < pivot[0, tsize]
+            to = middle
+          else
+            from = middle + 1
+          end
+        elsif term[0, @suffixes.inline_suffix_size] < pivot
+          to = middle
+        else
+          # FIXME: handle pivot[-1] = 255?
+          pivot = pivot.clone
+          pivot[-1] += 1
+          #puts "TESTING AGAINST new pivot: #{pivot.inspect}" if $DEBUG
+          if term > pivot
+            from = middle + 1
+          else  # term[0, @inline_suffix_size] == pivot, disambiguate
+            pivot = @fulltext_reader.get_data(@suffixes[middle], term.size)
+            if term < pivot
+              to = middle
+            else
+              from = middle + 1
+            end
+          end
+        end
+      end
+  
+      [from, to]
+    end
   end
 end
