@@ -1,15 +1,15 @@
 # Copyright (C) 2006  Mauricio Fernandez <mfp@acm.org>
-#
 
 require 'test/unit'
+
 $:.unshift File.join(File.dirname(__FILE__), "..", "lib")
-$:.unshift "lib"
-require 'ftsearch/fragment_writer'
+
+require 'word_search/fragment_writer'
 
 class TestFragment < Test::Unit::TestCase
-  include FTSearch
+
   def setup
-    @fragment = FragmentWriter.new(:path => nil)
+    @fragment = WordSearch::FragmentWriter.new(:path => nil)
   end
 
   def test_add_document

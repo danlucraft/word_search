@@ -71,3 +71,27 @@ module WordSearch
     end
   end
 end
+
+=begin
+
+Fulltext format:
+
+(document:
+  4B: length of this document
+  (field:
+    4B: id
+    4B: value length
+    DATA: value
+    \0
+  )+
+)+
+\0
+
+=end
+
+
+
+
+
+
+

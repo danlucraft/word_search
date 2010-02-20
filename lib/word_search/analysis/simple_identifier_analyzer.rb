@@ -8,7 +8,8 @@ module WordSearch
       sc = StringScanner.new(text)
       sc.skip(/[^A-Za-z_]+/)
       until sc.eos?
-        array << (sc.pos + offset)
+        p [:adding_suffix, sc.pos, offset, text[(sc.pos)..-1]]
+        array << sc.pos + offset
         break unless sc.skip(/[A-Za-z_][A-Za-z0-9_]*[^A-Za-z_]*/)
       end
     end
