@@ -26,13 +26,12 @@ class Lookup
   def search_a(line)
     line = line[1..-1]
     t = Time.new
-    hit = suffix_array_reader.find_first(line)
-    puts "Needed #{Time.new - t}"
-    p hit
-    next unless hit
-    p hit.context(30)
+    searcher = WordSearch::SuffixSearcher.new(suffix_array_reader, fulltext_reader)
+    until hit = searcher.find_first(line)
+	    puts "Needed #{Time.new - t}"
+	  end
     t = Time.new
-    puts "Total hits: #{suffix_array_reader.count_hits(line)} (#{Time.new - t})"
+    puts "Total hits: #{searcher.count_hits(line)} (#{Time.new - t})"
   end
 
   def search_b(line)
