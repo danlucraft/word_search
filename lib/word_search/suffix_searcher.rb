@@ -126,7 +126,6 @@ module WordSearch
       from
     end
   
-  
     def binary_search_inline_suffixes(term, from, to)
       return [from, to] if @suffixes.block_size == 0
   

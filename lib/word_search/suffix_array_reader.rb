@@ -7,7 +7,7 @@ module WordSearch
       :io   => nil,
     }
     
-    attr_reader :block_size
+    attr_reader :block_size, :inline_suffixes, :inline_suffix_size
     
     def initialize(doc_map, options = {})
       options = DEFAULT_OPTIONS.merge(options)
