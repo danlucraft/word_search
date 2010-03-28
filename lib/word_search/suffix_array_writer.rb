@@ -25,13 +25,11 @@ module WordSearch
         raise "Cannot merge if the destination SuffixArrayWriter isn't empty!"
       end
       suffix_array_reader.dump_data do |partial_sarray|
-        p :foo
         @suffixes.concat partial_sarray
       end
     end
   
     def add_suffixes(analyzer, data, offset)
-    p analyzer
       analyzer.append_suffixes(@suffixes, data, offset)
     end
   
@@ -59,10 +57,7 @@ module WordSearch
     private
     
     def dump_suffixes(fulltext)
-    p @suffixes
       io = @path ? File.open(@path, "wb") : memory_io
-      p [@suffixes.size, @block_size || 0, @inline_suffix_size]
-      p [@suffixes.size, @block_size || 0, @inline_suffix_size].pack("VVV").unpack("U*")
       io.write([@suffixes.size, @block_size || 0, @inline_suffix_size].pack("VVV"))
       if @block_size
         dump_inline_suffixes(io, fulltext)
@@ -74,11 +69,7 @@ module WordSearch
     end
   
     def dump_inline_suffixes(io, fulltext)
-      p :dump_inline_suffixes
-      0.step(@suffixes.size, @block_size) do |suffix_idx|
-      p [:suffix_id, suffix_idx]
-      p fulltext[@suffixes[suffix_idx], @inline_suffix_size]
-      p [fulltext[@suffixes[suffix_idx], @inline_suffix_size]].pack("a#{@inline_suffix_size}").unpack("U*")
+      0.step(@suffixes.size - 1, @block_size) do |suffix_idx|
         io.write([fulltext[@suffixes[suffix_idx], @inline_suffix_size]].pack("a#{@inline_suffix_size}"))
       end
     end

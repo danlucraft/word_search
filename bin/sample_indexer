@@ -16,7 +16,6 @@ else
   field_infos.add_field(:name => :body, :analyzer => WordSearch::Analysis::SimpleIdentifierAnalyzer.new)
 end
 
-
 fragment  = WordSearch::FragmentWriter.new("INDEX-test")
 fragment.field_infos = field_infos
 
