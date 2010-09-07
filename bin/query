@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+$:.push(File.dirname(__FILE__) + '/../lib')
+require 'word_search'
+
+lookup = WordSearch::Lookup.new("INDEX-test", false)
+lookup.search_b(ARGV[0])
+
