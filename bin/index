@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+$:.push(File.dirname(__FILE__) + '/../lib')
+require 'word_search'
+
+require 'optparse'
+require 'fileutils'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: index [options] DIR"
+  
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+
+  opts.on("-d", "--index-dir DIR", "Put the index files in this directory") do |index_dir|
+    options[:index_dir] = index_dir
+  end
+
+  opts.on("--overwrite", "Overwrite the index dir if it already exists") do |overwrite|
+    options[:overwrite] = overwrite
+  end
+end.parse!
+
+raise OptionParser::MissingArgument, :index_dir if options[:index_dir].nil?
+
+if File.exist?(options[:index_dir])
+  if options[:overwrite]
+    FileUtils.rm_rf(options[:index_dir])
+  else
+    raise "index_dir already exists"
+  end
+end
+
+s = Time.now
+
+field_infos = WordSearch::FieldInfos.new
+field_infos.add_field(:uri, FileNameAnalyzer.new)
+
+if ARGV.include?("--total")
+  analyzer = WordSearch::Analysis::TotalAnalyzer.new
+else
+  analyzer = WordSearch::Analysis::SimpleIdentifierAnalyzer.new
+end
+
+field_infos.add_field(:body, analyzer)
+
+fragment  = WordSearch::FragmentWriter.new(options[:index_dir])
+fragment.field_infos = field_infos
+
+dir = ARGV[0]
+puts "Indexing directory #{dir}" if options[:verbose]
+files = `find #{dir} -name "*.rb"`
+filenames = files.split("\n")
+filenames.each do |filename|
+  body = File.read(filename)
+  puts "adding #{filename} -- #{body.size}" if options[:verbose]
+  fragment.add_document(:uri => filename, :body => body)
+end
+
+fragment.finish!
+puts "took #{Time.now - s}s" if options[:verbose]
+
+

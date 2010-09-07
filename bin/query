@@ -3,6 +3,31 @@
 $:.push(File.dirname(__FILE__) + '/../lib')
 require 'word_search'
 
-lookup = WordSearch::Lookup.new("INDEX-test", false)
-lookup.search_b(ARGV[0])
+
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: query [options] DIR TERM"
+  
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
+end.parse!
+
+dir = ARGV[0]
+if !dir
+  raise OptionParser::MissingArgument, :DIR 
+end
+
+if !File.exist?(dir) or !File.directory?(dir)
+  raise "missing index dir #{dir}"
+end
+
+unless term = ARGV[1]
+  raise OptionParser::MissingArgument, :TERM
+end
+
+lookup = WordSearch::Lookup.new(dir, false)
+lookup.search_b(term)
 
