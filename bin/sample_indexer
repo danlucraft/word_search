@@ -19,12 +19,13 @@ end
 fragment  = WordSearch::FragmentWriter.new("INDEX-test")
 fragment.field_infos = field_infos
 
-file_list = Dir[ARGV[0]]
-
-file_list[0, file_list.size/1].each do |file|
-  body = File.read(file)
-#  puts "adding #{file} -- #{body.size}"
-  fragment.add_document(:uri => file, :body => body)
+dir = ARGV[0]
+files = `find #{dir} -name "*.rb"`
+filenames = files.split("\n")
+filenames.each do |filename|
+  body = File.read(filename)
+  puts "adding #{filename} -- #{body.size}"
+  fragment.add_document(:uri => filename, :body => body)
 end
 
 puts "writing"
