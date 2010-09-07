@@ -1,6 +1,6 @@
 
 module WordSearch
-  class Lookup
+  class Query
     attr_reader :dir, :probabilistic_sorting
     attr_writer :fulltext_reader
   

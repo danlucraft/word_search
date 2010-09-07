@@ -6,7 +6,7 @@ require 'word_search'
 dir = ARGV[0] || "INDEX-test"
 probabilistic_sorting = ((ARGV.last||"").index("pro"))
 
-lookup = WordSearch::Lookup.new(dir, probabilistic_sorting)
+lookup = WordSearch::Query.new(dir, probabilistic_sorting)
 
 until (print "Input term: "; line = $stdin.gets.chomp).empty?
   if line[0] == ?!

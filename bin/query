@@ -28,6 +28,6 @@ unless term = ARGV[1]
   raise OptionParser::MissingArgument, :TERM
 end
 
-lookup = WordSearch::Lookup.new(dir, false)
+lookup = WordSearch::Query.new(dir, false)
 lookup.search_b(term)
 
