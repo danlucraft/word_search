@@ -1,3 +1,4 @@
 *.o
 *.bundle
 INDEX-test
+.redcar
